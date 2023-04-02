@@ -22,22 +22,36 @@
             <td><%= link_to 'Edit', edit_book_path(@book), class: "btn btn-sm btn-success" %></td>
             <td><%= link_to 'Destroy', @book, method: :delete, data: { confirm: '本当に消しますか？' }, class: "btn btn-sm btn-danger"%></td>
             <% end %>
-        </tr>
-      </table>
-      <table class='table'>
-        <tr><% @book.post_comments.each do |post_comment| %>
-          <td><%= image_tag post_comment.user.get_profile_image, size:"100x100" %><br>
-             <%= link_to post_comment.user.name,user_path(post_comment.user_id) %>
-          </td>
-          <td><%= post_comment.created_at.strftime('%Y/%m/%d') %></td>
-          <td><%= post_comment.comment %></td>
-            <% if post_comment.user == current_user %>
-            <td><%= link_to "削除", book_post_comment_path(post_comment.book, post_comment), method: :delete %></td>
+          <% if @book.favorited_by?(current_user) %>
+          <td><%= link_to book_favorites_path(@book), method: :delete do %>
+                ♥<%= @book.favorites.count %> いいね
+              <% end %></td>
+          <% else %>
+          <td><%= link_to book_favorites_path(@book), method: :post do %>
+              ♡<%= @book.favorites.count %> いいね
             <% end %>
+          </td>
           <% end %>
         </tr>
       </table>
-      <div>
+      <div class='col-md-8 offset-md-1'>
+        <h3>Comment</h3>
+        <table class='table'>
+          <% @book.post_comments.each do |post_comment| %>
+          <tr>
+            <td><%= image_tag post_comment.user.get_profile_image, size:"100x100" %><br>
+               <%= link_to post_comment.user.name,user_path(post_comment.user_id) %>
+            </td>
+            <td><%= post_comment.created_at.strftime('%Y/%m/%d') %></td>
+            <td><%= post_comment.comment %></td>
+              <% if post_comment.user == current_user %>
+              <td><%= link_to "削除", book_post_comment_path(post_comment.book, post_comment), method: :delete %></td>
+              <% end %>
+          </tr>
+          <% end %>
+        </table>
+      </div>
+      <div class='col-md-8 offset-md-1'>
       <%= form_with model: [@book, @post_comment] do |f| %>
         <%= f.text_area :comment, rows: '5', placeholder: "コメントをここに" %>
         <%= f.submit "送信する" %>
